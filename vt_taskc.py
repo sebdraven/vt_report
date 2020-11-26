@@ -31,5 +31,5 @@ def vt_report(hash_file, api_key):
         r = response.json()
         directory = 'jsons/%s/%s/%s/%s/%s' % (hash_file[0:2], hash_file[3:5], hash_file[6:8], hash_file[9:11], hash_file[12:14])
         os.makedirs(directory, exist_ok=True)
-        json.dump(r, open(os.path.join(directory, '%s.json' % hash), 'w'))
-        print('records %s.json' % hash)
+        json.dump(r, open(os.path.join(directory, '%s.json' % hash_file), 'w'))
+        print('records %s.json' % hash_file)

@@ -361,7 +361,7 @@ def main(args):
         sys.stderr.write('[-] Alias data in %s\n' % (alias_filename))
 
 
-if __name__=='__main__':
+def parser_cli():
     argparser = argparse.ArgumentParser(prog='avclass2_labeler',
         description='''Extracts tags for a set of samples.
             Also calculates precision and recall if ground truth available''')
@@ -481,4 +481,4 @@ if __name__=='__main__':
         sys.stderr.write('[-] Using default expansion tags in %s\n' % (
                           default_exp_file))
 
-    main(args)
+    return args

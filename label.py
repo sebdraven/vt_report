@@ -4,7 +4,7 @@ from celery import Celery
 import requests
 from redis import StrictRedis
 import argparse
-from avclass2.avclass2_labeler import main
+from avclass2.avclass2_labeler import main,parser_cli
 celery_broker = 'redis://127.0.0.1:6379/5'
 celery_backend = 'redis://127.0.0.1:6379/5'
 
@@ -13,6 +13,6 @@ redis_client = StrictRedis()
 
 @celery.task
 def process(path_of_file):
-    args = argparse.ArgumentParser()
+    args = parser_cli()
     args.vt = path_of_file
     main(args)

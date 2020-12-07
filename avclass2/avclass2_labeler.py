@@ -141,7 +141,11 @@ def main(args):
             vt_all += 1
 
             # Read JSON line
-            vt_rep = json.loads(line)
+            try:
+                vt_rep = json.loads(line)
+            except:
+                sys.stderr.write('file %s is not valid' % ifile)
+                return
 
             # Extract sample info
             sample_info = get_sample_info(vt_rep)

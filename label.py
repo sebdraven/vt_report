@@ -12,7 +12,7 @@ celery = Celery('labels', broker=celery_broker, backend= celery_backend)
 redis_client = StrictRedis()
 
 @celery.task
-def label(path_of_file):
+def process(path_of_file):
     args = argparse.ArgumentParser()
     args.vt = path_of_file
     main(args)

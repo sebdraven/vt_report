@@ -8,7 +8,7 @@ import time
 from redis import StrictRedis
 
 from vt_taskc import vt_report, push
-from label import label
+from label import process
 
 redis_client = StrictRedis()
 
@@ -37,7 +37,7 @@ def label(json_dir='jsons'):
     json_path = os.path.join(os.path.dirname(__file__), json_dir)
     for root, dir, files in os.walk(json_path):
         for name in files:
-            label.delay(name)
+            process.delay(name)
 
 
 def parse_command_line():

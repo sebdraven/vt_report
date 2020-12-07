@@ -55,3 +55,5 @@ if __name__ == '__main__':
         record_file()
     if args.vt_report:
         vt_report_launcher(args.vt_report)
+    if args.label:
+        label()

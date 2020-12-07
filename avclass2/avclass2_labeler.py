@@ -22,7 +22,8 @@ default_exp_file = os.path.join(script_dir, "data/default.expansion")
 # Default taxonomy file
 default_tax_file = os.path.join(script_dir, "data/default.taxonomy")
 
-client_redis = StrictRedis()
+client_redis = StrictRedis(db=1)
+
 def guess_hash(h):
     ''' Given a hash string, guess the hash type based on the string length '''
     hlen = len(h)

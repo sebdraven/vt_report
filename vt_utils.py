@@ -8,6 +8,7 @@ import time
 from redis import StrictRedis
 
 from vt_taskc import vt_report, push
+from label import label
 
 redis_client = StrictRedis()
 
@@ -31,6 +32,11 @@ def record_file(malware_data='/data/malware_samples/DATASET'):
         for name in files:
             push.delay(name)
 
+
+def label(json_path='json'):
+    for root,dir, files in os.walk(json):
+        for name in files:
+            label.delay(name)
 
 
 def parse_command_line():

@@ -10,7 +10,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 import argparse
 from avclass2.lib.avclass2_common import AvLabels
 from operator import itemgetter
-import evaluate_clustering as ec
+import avclass2.evaluate_clustering as ec
 import json
 import traceback
 from redis import StrictRedis

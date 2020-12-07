@@ -33,8 +33,8 @@ def record_file(malware_data='/data/malware_samples/DATASET'):
             push.delay(name)
 
 
-def label(json_path='json'):
-    for root,dir, files in os.walk(json):
+def label(json_path='jsons'):
+    for root, dir, files in os.walk(json_path):
         for name in files:
             label.delay(name)
 

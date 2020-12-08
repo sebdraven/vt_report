@@ -64,12 +64,12 @@ def list_str(l, sep=", ", prefix=""):
 
 def main(args):
     # Select hash used to identify sample, by default MD5
-    hash_type = args.hash if args.hash else 'md5'
+    hash_type = args.get('vt_report', 'hash')
 
     # If ground truth provided, read it from file
     gt_dict = {}
-    if args.gt:
-        with open(args.gt, 'r') as gt_fd:
+    if args.has_option('vt_report', 'gt'):
+        with open(args.get('vt_report', 'gt'), 'r') as gt_fd:
             for line in gt_fd:
                 gt_hash, family = map(str, line.strip().split('\t', 1))
                 gt_dict[gt_hash] = family
@@ -78,25 +78,25 @@ def main(args):
         hash_type = guess_hash(list(gt_dict.keys())[0])
 
     # Create AvLabels object
-    av_labels = AvLabels(args.tag, args.exp, args.tax,
+    av_labels = AvLabels(args.get('vt_report', 'tag'), args.get('vt_report','exp'), args.get('vt_report', 'tax'),
                          args.av, args.aliasdetect)
 
     # Build list of input files
     # NOTE: duplicate input files are not removed
     ifile_l = []
-    if (args.vt):
-        ifile_l += args.vt
+    if args.has_option('vt_report', 'vt'):
+        ifile_l += args.get('vt_report', 'vt')
         ifile_are_vt = True
-    if (args.lb):
+    if args.has_option('vt_report','lb'):
         ifile_l += args.lb
         ifile_are_vt = False
-    if (args.vtdir):
-        ifile_l += [os.path.join(args.vtdir, 
-                                  f) for f in os.listdir(args.vtdir)]
+    if args.has_option('vt_report', 'vtdir'):
+        ifile_l += [os.path.join(args.get('vt_report','vtdir'),
+                                  f) for f in os.listdir(args.get('vt_report', 'vtdir'))]
         ifile_are_vt = True
-    if (args.lbdir):
-        ifile_l += [os.path.join(args.lbdir, 
-                                  f) for f in os.listdir(args.lbdir)]
+    if args.has_option('vt_report','lbdir'):
+        ifile_l += [os.path.join(args.get('vt_report', 'lbdir'),
+                                  f) for f in os.listdir(args.get('vt_report', 'lbdir'))]
         ifile_are_vt = False
 
     # Select correct sample info extraction function
@@ -223,7 +223,7 @@ def main(args):
                                     stats[c] += 1
 
                 # Check if sample is PUP, if requested
-                if args.pup:
+                if args.has_option('vt_report', 'pup'):
                     if av_labels.is_pup(tags, av_labels.taxonomy):
                         is_pup_str = "\t1"
                     else:
@@ -233,7 +233,7 @@ def main(args):
 
                 # Select family for sample if needed,
                 # i.e., for compatibility mode or for ground truth
-                if args.c or args.gt:
+                if args.has_option('vt_report', 'c') or args.get('vt_report', 'gt'):
                     fam = "SINGLETON:" + name
                     # fam = ''
                     for (t,s) in tags:
@@ -243,21 +243,21 @@ def main(args):
                             break
 
                 # Get ground truth family, if available
-                if args.gt:
+                if args.get('vt_report', 'gt'):
                     first_token_dict[name] = fam
                     gt_family = '\t' + gt_dict.get(name, "")
                 else:
                     gt_family = ""
 
                 # Get VT tags as string
-                if args.vtt:
+                if args.has_option('vt_report','vtt'):
                     vtt = list_str(sample_info.vt_tags, prefix="\t")
                 else:
                     vtt = ""
 
                 # Print family (and ground truth if available) to stdout
-                if not args.c:
-                    if args.path:
+                if not args.has_option('vt_report', 'c'):
+                    if args.get('vt_report', 'path'):
                         tag_str = format_tag_pairs(tags, av_labels.taxonomy)
                     else:
                         tag_str = format_tag_pairs(tags)
@@ -286,7 +286,7 @@ def main(args):
                 len(gt_dict)))
 
     # If ground truth, print precision, recall, and F1-measure
-    if args.gt:
+    if args.get('vt_report', 'gt'):
         precision, recall, fmeasure = \
                     ec.eval_precision_recall_fmeasure(gt_dict,
                                                       first_token_dict)
@@ -295,7 +295,7 @@ def main(args):
                           (precision, recall, fmeasure))
 
     # Output stats
-    if args.stats:
+    if args.has_option('vt_report', 'stats'):
         stats_fd = open("%s.stats" % out_prefix, 'w')
         num_samples = vt_all
         stats_fd.write('Samples: %d\n' % num_samples)
@@ -312,7 +312,7 @@ def main(args):
         stats_fd.close()
 
     # Output vendor info
-    if args.avtags:
+    if args.has_option('vt_report', 'avtags'):
         avtags_fd = open("%s.avtags" % out_prefix, 'w')
         for t in sorted(avtags_dict.keys()):
             avtags_fd.write('%s\t' % t)
@@ -325,7 +325,7 @@ def main(args):
         avtags_fd.close()
 
     # If alias detection, print map
-    if args.aliasdetect:
+    if args.has_option('vt_report', 'aliasdetect'):
         # Open alias file
         alias_filename = out_prefix + '.alias'
         alias_fd = open(alias_filename, 'w+')
@@ -359,126 +359,3 @@ def main(args):
         # Close alias file
         alias_fd.close()
         sys.stderr.write('[-] Alias data in %s\n' % (alias_filename))
-
-
-def parser_cli():
-    argparser = argparse.ArgumentParser(prog='avclass2_labeler',
-        description='''Extracts tags for a set of samples.
-            Also calculates precision and recall if ground truth available''')
-
-    argparser.add_argument('-vt', action='append',
-        help='file with VT reports '
-             '(Can be provided multiple times)')
-
-    argparser.add_argument('-lb', action='append',
-        help='file with simplified JSON reports'
-             '{md5,sha1,sha256,scan_date,av_labels} '
-             '(Can be provided multiple times)')
-
-    argparser.add_argument('-vtdir',
-        help='existing directory with VT reports')
-
-    argparser.add_argument('-lbdir',
-        help='existing directory with simplified JSON reports')
-
-    argparser.add_argument('-vt3', action='store_true',
-        help='input are VT v3 files')
-
-    argparser.add_argument('-gt',
-        help='file with ground truth. '
-             'If provided it evaluates clustering accuracy. '
-             'Prints precision, recall, F1-measure.')
-
-    argparser.add_argument('-vtt',
-        help='Include VT tags in the output.',
-        action='store_true')
-
-    argparser.add_argument('-tag',
-        help='file with tagging rules.',
-        default = default_tag_file)
-
-    argparser.add_argument('-tax',
-        help='file with taxonomy.',
-        default = default_tax_file)
-
-    argparser.add_argument('-exp',
-        help='file with expansion rules.',
-        default = default_exp_file)
-
-    argparser.add_argument('-av',
-        help='file with list of AVs to use')
-
-    argparser.add_argument('-avtags',
-        help='extracts tags per av vendor',
-        action='store_true')
-
-    argparser.add_argument('-pup',
-        action='store_true',
-        help='if used each sample is classified as PUP or not')
-
-    argparser.add_argument('-p', '--path',
-        help='output.full path for tags',
-        action='store_true')
-
-    argparser.add_argument('-hash',
-        help='hash used to name samples. Should match ground truth',
-        choices=['md5', 'sha1', 'sha256'])
-
-    argparser.add_argument('-c',
-        help='Compatibility mode. Outputs results in AVClass format.',
-        action='store_true')
-
-    argparser.add_argument('-aliasdetect',
-        action='store_true',
-        help='if used produce aliases file at end')
-
-    argparser.add_argument('-stats',
-                           action='store_true',
-                           help='if used produce 1 file '
-                                'with stats per category '
-                                '(File, Class, '
-                                'Behavior, Family, Unclassified)')
-
-    args = argparser.parse_args()
-
-    if not args.vt and not args.lb and not args.vtdir and not args.lbdir:
-        sys.stderr.write('One of the following 4 arguments is required: '
-                          '-vt,-lb,-vtdir,-lbdir\n')
-        exit(1)
-
-    if (args.vt or args.vtdir) and (args.lb or args.lbdir):
-        sys.stderr.write('Use either -vt/-vtdir or -lb/-lbdir. '
-                          'Both types of input files cannot be combined.\n')
-        exit(1)
-
-    if args.tag:
-        if args.tag == '/dev/null':
-            sys.stderr.write('[-] Using no tagging rules\n')
-        else:
-            sys.stderr.write('[-] Using tagging rules in %s\n' % (
-                              args.tag))
-    else:
-        sys.stderr.write('[-] Using default tagging rules in %s\n' % (
-                          default_tag_file))
-
-    if args.tax:
-        if args.tax == '/dev/null':
-            sys.stderr.write('[-] Using no taxonomy\n')
-        else:
-            sys.stderr.write('[-] Using taxonomy in %s\n' % (
-                              args.tax))
-    else:
-        sys.stderr.write('[-] Using default taxonomy in %s\n' % (
-                          default_tax_file))
-
-    if args.exp:
-        if args.exp == '/dev/null':
-            sys.stderr.write('[-] Using no expansion tags\n')
-        else:
-            sys.stderr.write('[-] Using expansion tags in %s\n' % (
-                              args.exp))
-    else:
-        sys.stderr.write('[-] Using default expansion tags in %s\n' % (
-                          default_exp_file))
-
-    return args

@@ -4,7 +4,7 @@ import json
 import os
 import sys
 import time
-
+import os.path
 from redis import StrictRedis
 
 from vt_taskc import vt_report, push
@@ -38,7 +38,7 @@ def label(json_dir='jsons', debug=True):
     number_file = 0
     for root, dir, files in os.walk(json_path):
         for name in files:
-            path = os.join(dir,name)
+            path = os.path.join(root, name)
             process.delay(path)
             if debug:
                 number_file += 1

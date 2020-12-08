@@ -61,4 +61,4 @@ if __name__ == '__main__':
     if args.vt_report:
         vt_report_launcher(args.vt_report)
     if args.label:
-        label()
+        label(debug=False)

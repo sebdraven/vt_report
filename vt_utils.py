@@ -33,12 +33,16 @@ def record_file(malware_data='/data/malware_samples/DATASET'):
             push.delay(name)
 
 
-def label(json_dir='jsons'):
+def label(json_dir='jsons', debug=True):
     json_path = os.path.join(os.path.dirname(__file__), json_dir)
+    number_file = 0
     for root, dir, files in os.walk(json_path):
         for name in files:
             process.delay(name)
-
+            if debug:
+                number_file += 1
+        if number_file == 100:
+            break
 
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')

@@ -38,7 +38,8 @@ def label(json_dir='jsons', debug=True):
     number_file = 0
     for root, dir, files in os.walk(json_path):
         for name in files:
-            process.delay(name)
+            path = os.join(dir,name)
+            process.delay(path)
             if debug:
                 number_file += 1
         if number_file == 1:

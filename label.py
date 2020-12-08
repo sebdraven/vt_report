@@ -17,4 +17,5 @@ redis_client = StrictRedis()
 def process(path_of_file):
     args = ConfigParser()
     args.read('vt_report.conf')
+    args.set('vt_report', 'vt', path_of_file)
     main(args)

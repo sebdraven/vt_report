@@ -392,7 +392,7 @@ class AvLabels:
             sha1 = vt_rep['sha1']
             sha256 = vt_rep['sha256']
         except KeyError:
-            return None
+            print('Error hash')
         # Obtain labels from scan results
         for av, res in scans.items():
             if res['detected']:

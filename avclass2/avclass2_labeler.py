@@ -79,16 +79,16 @@ def main(args):
 
     # Create AvLabels object
     av_labels = AvLabels(args.get('vt_report', 'tag'), args.get('vt_report','exp'), args.get('vt_report', 'tax'),
-                         args.av, args.aliasdetect)
+                         args.get('vt_report','av'), args.has_option('vt_report','aliasdetect'))
 
     # Build list of input files
     # NOTE: duplicate input files are not removed
     ifile_l = []
     if args.has_option('vt_report', 'vt'):
-        ifile_l += args.get('vt_report', 'vt')
+        ifile_l.append(args.get('vt_report', 'vt'))
         ifile_are_vt = True
-    if args.has_option('vt_report','lb'):
-        ifile_l += args.lb
+    if args.has_option('vt_report', 'lb'):
+        ifile_l += args.get('vt_report', 'lb')
         ifile_are_vt = False
     if args.has_option('vt_report', 'vtdir'):
         ifile_l += [os.path.join(args.get('vt_report','vtdir'),
@@ -102,7 +102,7 @@ def main(args):
     # Select correct sample info extraction function
     if not ifile_are_vt:
         get_sample_info = av_labels.get_sample_info_lb
-    elif args.vt3:
+    elif args.has_option('vt_report', 'vt3'):
         get_sample_info = av_labels.get_sample_info_vt_v3
     else:
         get_sample_info = av_labels.get_sample_info_vt_v2
@@ -120,164 +120,166 @@ def main(args):
              'FAM': 0, 'CLASS': 0, 'BEH': 0, 'FILE': 0, 'UNK': 0}
 
     # Process each input file
-    for ifile in ifile_l:
-        # Open file
-        fd = open(ifile, 'r')
+    ifile = ifile_l[0]
+    # Open file
+    fd = open(ifile, 'r')
 
-        # Debug info, file processed
-        sys.stderr.write('[-] Processing input file %s\n' % ifile)
+    # Debug info, file processed
+    sys.stderr.write('[-] Processing input file %s\n' % ifile)
 
-        # Process all lines in file
-        for line in fd:
+    # Process all lines in file
+    for line in fd:
 
-            # If blank line, skip
-            if line == '\n':
-                continue
-
-            # Debug info
-            if vt_all % 100 == 0:
-                sys.stderr.write('\r[-] %d JSON read' % vt_all)
-                sys.stderr.flush()
-            vt_all += 1
-
-            # Read JSON line
-            try:
-                vt_rep = json.loads(line)
-            except:
-                sys.stderr.write('file %s is not valid' % ifile)
-                return
-
-            # Extract sample info
-            sample_info = get_sample_info(vt_rep)
-
-            # If no sample info, log error and continue
-            if sample_info is None:
-                try:
-                    name = vt_rep['md5']
-                    sys.stderr.write('\nNo scans for %s\n' % name)
-                except KeyError:
-                    sys.stderr.write('\nCould not process: %s\n' % line)
-                sys.stderr.flush()
-                stats['noscans'] += 1
-                continue
-
-            # Sample's name is selected hash type (md5 by default)
-            name = getattr(sample_info, hash_type)
-
-            # If the VT report has no AV labels, output and continue
-            if not sample_info.labels:
-                sys.stdout.write('%s\t-\t[]\n' % (name))
-                # sys.stderr.write('\nNo AV labels for %s\n' % name)
-                # sys.stderr.flush()
-                continue
-
-            # Compute VT_Count
-            vt_count = len(sample_info.labels)
-
-            # Get the distinct tokens from all the av labels in the report
-            # And print them. 
-            try:
-                av_tmp = av_labels.get_sample_tags(sample_info)
-                tags = av_labels.rank_tags(av_tmp)
-
-                # AV VENDORS PER TOKEN
-                if args.avtags:
-                    for t in av_tmp:
-                        tmap = avtags_dict.get(t, {})
-                        for av in av_tmp[t]:
-                            ctr = tmap.get(av, 0)
-                            tmap[av] = ctr + 1
-                        avtags_dict[t] = tmap
-
-                if args.aliasdetect:
-                    prev_tokens = set()
-                    for entry in tags:
-                        curr_tok = entry[0]
-                        curr_count = token_count_map.get(curr_tok, 0)
-                        token_count_map[curr_tok] = curr_count + 1
-                        for prev_tok in prev_tokens:
-                            if prev_tok < curr_tok:
-                                pair = (prev_tok,curr_tok)
-                            else:
-                                pair = (curr_tok,prev_tok)
-                            pair_count = pair_count_map.get(pair, 0)
-                            pair_count_map[pair] = pair_count + 1
-                        prev_tokens.add(curr_tok)
-
-                # Collect stats
-                # FIX: should iterate once over tags, 
-                # for both stats and aliasdetect
-                if tags:
-                    stats["tagged"] += 1
-                    if args.stats:
-                        if (vt_count > 3):
-                            stats["maltagged"] += 1
-                            cat_map = {'FAM': False, 'CLASS': False,
-                                       'BEH': False, 'FILE': False, 'UNK':
-                                           False}
-                            for t in tags:
-                                path, cat = av_labels.taxonomy.get_info(t[0])
-                                cat_map[cat] = True
-                            for c in cat_map:
-                                if cat_map[c]:
-                                    stats[c] += 1
-
-                # Check if sample is PUP, if requested
-                if args.has_option('vt_report', 'pup'):
-                    if av_labels.is_pup(tags, av_labels.taxonomy):
-                        is_pup_str = "\t1"
-                    else:
-                        is_pup_str = "\t0"
-                else:
-                    is_pup_str =  ""
-
-                # Select family for sample if needed,
-                # i.e., for compatibility mode or for ground truth
-                if args.has_option('vt_report', 'c') or args.get('vt_report', 'gt'):
-                    fam = "SINGLETON:" + name
-                    # fam = ''
-                    for (t,s) in tags:
-                        cat = av_labels.taxonomy.get_category(t)
-                        if (cat == "UNK") or (cat == "FAM"):
-                            fam = t
-                            break
-
-                # Get ground truth family, if available
-                if args.get('vt_report', 'gt'):
-                    first_token_dict[name] = fam
-                    gt_family = '\t' + gt_dict.get(name, "")
-                else:
-                    gt_family = ""
-
-                # Get VT tags as string
-                if args.has_option('vt_report','vtt'):
-                    vtt = list_str(sample_info.vt_tags, prefix="\t")
-                else:
-                    vtt = ""
-
-                # Print family (and ground truth if available) to stdout
-                if not args.has_option('vt_report', 'c'):
-                    if args.get('vt_report', 'path'):
-                        tag_str = format_tag_pairs(tags, av_labels.taxonomy)
-                    else:
-                        tag_str = format_tag_pairs(tags)
-                    client_redis.set(name, '%s\t%d\t%s%s%s%s\n' %
-                                     (name, vt_count, tag_str, gt_family,
-                                      is_pup_str, vtt))
-                else:
-                    sys.stdout.write('%s\t%s%s%s\n' %
-                                     (name, fam, gt_family, is_pup_str))
-            except:
-                traceback.print_exc(file=sys.stderr)
-                continue
+        # If blank line, skip
+        if line == '\n':
+            continue
 
         # Debug info
-        sys.stderr.write('\r[-] %d JSON read' % vt_all)
-        sys.stderr.flush()
-        sys.stderr.write('\n')
+        if vt_all % 100 == 0:
+            sys.stderr.write('\r[-] %d JSON read' % vt_all)
+            sys.stderr.flush()
+        vt_all += 1
 
-        # Close file
-        fd.close()
+        # Read JSON line
+        try:
+            vt_rep = json.loads(line)
+        except:
+            sys.stderr.write('file %s is not valid' % ifile)
+            return
+
+        # Extract sample info
+        sample_info = get_sample_info(vt_rep)
+        print(sample_info)
+
+        # If no sample info, log error and continue
+        if sample_info is None:
+            try:
+                name = vt_rep['md5']
+                sys.stderr.write('\nNo scans for %s\n' % name)
+            except KeyError:
+                sys.stderr.write('\nCould not process: %s\n' % line)
+            sys.stderr.flush()
+            stats['noscans'] += 1
+            continue
+
+        # Sample's name is selected hash type (md5 by default)
+        name = getattr(sample_info, hash_type)
+
+        # If the VT report has no AV labels, output and continue
+        if not sample_info.labels:
+            sys.stdout.write('%s\t-\t[]\n' % (name))
+            # sys.stderr.write('\nNo AV labels for %s\n' % name)
+            # sys.stderr.flush()
+            continue
+
+        # Compute VT_Count
+        vt_count = len(sample_info.labels)
+
+        # Get the distinct tokens from all the av labels in the report
+        # And print them.
+        try:
+            av_tmp = av_labels.get_sample_tags(sample_info)
+            tags = av_labels.rank_tags(av_tmp)
+
+            # AV VENDORS PER TOKEN
+            if args.has_option('vt_report','tag'):
+                for t in av_tmp:
+                    tmap = avtags_dict.get(t, {})
+                    for av in av_tmp[t]:
+                        ctr = tmap.get(av, 0)
+                        tmap[av] = ctr + 1
+                    avtags_dict[t] = tmap
+
+            if args.has_option('vt_report', 'aliasdetect'):
+                prev_tokens = set()
+                for entry in tags:
+                    curr_tok = entry[0]
+                    curr_count = token_count_map.get(curr_tok, 0)
+                    token_count_map[curr_tok] = curr_count + 1
+                    for prev_tok in prev_tokens:
+                        if prev_tok < curr_tok:
+                            pair = (prev_tok,curr_tok)
+                        else:
+                            pair = (curr_tok,prev_tok)
+                        pair_count = pair_count_map.get(pair, 0)
+                        pair_count_map[pair] = pair_count + 1
+                    prev_tokens.add(curr_tok)
+
+            # Collect stats
+            # FIX: should iterate once over tags,
+            # for both stats and aliasdetect
+            if tags:
+                stats["tagged"] += 1
+                if args.has_option('vt_report','stats'):
+                    if (vt_count > 3):
+                        stats["maltagged"] += 1
+                        cat_map = {'FAM': False, 'CLASS': False,
+                                   'BEH': False, 'FILE': False, 'UNK':
+                                       False}
+                        for t in tags:
+                            path, cat = av_labels.taxonomy.get_info(t[0])
+                            cat_map[cat] = True
+                        for c in cat_map:
+                            if cat_map[c]:
+                                stats[c] += 1
+
+            # Check if sample is PUP, if requested
+            if args.has_option('vt_report', 'pup'):
+                if av_labels.is_pup(tags, av_labels.taxonomy):
+                    is_pup_str = "\t1"
+                else:
+                    is_pup_str = "\t0"
+            else:
+                is_pup_str =  ""
+
+            # Select family for sample if needed,
+            # i.e., for compatibility mode or for ground truth
+            if args.has_option('vt_report', 'c') or args.has_option('vt_report', 'gt'):
+                fam = "SINGLETON:" + name
+                # fam = ''
+                for (t,s) in tags:
+                    cat = av_labels.taxonomy.get_category(t)
+                    if (cat == "UNK") or (cat == "FAM"):
+                        fam = t
+                        break
+
+            # Get ground truth family, if available
+            if args.has_option('vt_report', 'gt'):
+                first_token_dict[name] = fam
+                gt_family = '\t' + gt_dict.get(name, "")
+            else:
+                gt_family = ""
+
+            # Get VT tags as string
+            if args.has_option('vt_report', 'vtt'):
+                vtt = list_str(sample_info.vt_tags, prefix="\t")
+            else:
+                vtt = ""
+
+            # Print family (and ground truth if available) to stdout
+            if not args.has_option('vt_report', 'c'):
+                if args.has_option('vt_report', 'path'):
+                    tag_str = format_tag_pairs(tags, av_labels.taxonomy)
+                else:
+                    tag_str = format_tag_pairs(tags)
+            
+                client_redis.set(name, '%s\t%d\t%s%s%s%s\n' %
+                                 (name, vt_count, tag_str, gt_family,
+                                  is_pup_str, vtt))
+            else:
+                sys.stdout.write('%s\t%s%s%s\n' %
+                                 (name, fam, gt_family, is_pup_str))
+        except:
+            traceback.print_exc(file=sys.stderr)
+            continue
+
+    # Debug info
+    sys.stderr.write('\r[-] %d JSON read' % vt_all)
+    sys.stderr.flush()
+    sys.stderr.write('\n')
+
+    # Close file
+    fd.close()
 
     # Print statistics
     sys.stderr.write(
@@ -286,7 +288,7 @@ def main(args):
                 len(gt_dict)))
 
     # If ground truth, print precision, recall, and F1-measure
-    if args.get('vt_report', 'gt'):
+    if args.has_option('vt_report', 'gt'):
         precision, recall, fmeasure = \
                     ec.eval_precision_recall_fmeasure(gt_dict,
                                                       first_token_dict)

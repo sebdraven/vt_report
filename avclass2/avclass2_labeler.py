@@ -266,6 +266,7 @@ def main(args):
                 client_redis.set(name, '%s\t%d\t%s%s%s%s\n' %
                                  (name, vt_count, tag_str, gt_family,
                                   is_pup_str, vtt))
+                print('ok')
             else:
                 sys.stdout.write('%s\t%s%s%s\n' %
                                  (name, fam, gt_family, is_pup_str))

@@ -41,7 +41,7 @@ def label(json_dir='jsons', debug=True):
             process.delay(name)
             if debug:
                 number_file += 1
-        if number_file == 100:
+        if number_file == 1:
             break
 
 def parse_command_line():

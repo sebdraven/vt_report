@@ -262,7 +262,7 @@ def main(args):
                     tag_str = format_tag_pairs(tags, av_labels.taxonomy)
                 else:
                     tag_str = format_tag_pairs(tags)
-            
+
                 client_redis.set(name, '%s\t%d\t%s%s%s%s\n' %
                                  (name, vt_count, tag_str, gt_family,
                                   is_pup_str, vtt))

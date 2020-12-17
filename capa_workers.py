@@ -28,7 +28,6 @@ def capa_extraction(path_rules, path_file):
     capabilities, counts = capa.main.find_capabilities(rules, extractor, disable_progress=True)
     meta = capa.main.collect_metadata('', path_file, path_rules, 'auto', extractor)
     capa_json = capa.render.render_json(meta, rules, capabilities)
-    db.close()
 
     if capa_json:
         name_file = os.path.basename(path_file)

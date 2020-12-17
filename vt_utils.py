@@ -7,8 +7,9 @@ import time
 import os.path
 from redis import StrictRedis
 
-from vt_taskc import vt_report, push, capa_extraction
+from vt_taskc import vt_report, push
 from label import process
+from capa_workers import capa_extraction
 import ZODB, ZODB.FileStorage
 import capa.rules
 import capa.main

@@ -61,17 +61,17 @@ def capa_extraction(db_rules, path_rules, path_file):
 
     if capa_json:
         name_file = os.path.basename(path_file)
-        path_dir = 'jsons/%s/%s/%s/%s' % (name_file[0:2], name_file[2:4], name_file[4:6], name_file[6:8])
+        path_dir = 'jsons_capa/%s/%s/%s/%s' % (name_file[0:2], name_file[2:4], name_file[4:6], name_file[6:8])
         try:
             os.makedirs(path_dir)
         except:
             pass
-        path_file = os.path.join(path_dir, name_file)
+        path_file_json = '%s.capa' % os.path.join(path_dir, name_file)
         try:
-            fw = open(path_file, 'w')
+            fw = open(path_file_json, 'w')
             if fw:
                 fw.write(capa_json)
-                logging.info('jsons results %s' % path_file)
+                logging.info('jsons results %s' % path_file_json)
                 fw.close()
         except:
             logging.error('Bad recording %s' % path_file)

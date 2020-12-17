@@ -51,8 +51,7 @@ def label(json_dir='jsons', debug=True):
             break
 
 def createobjectrules(path='mydata.fs',rules=''):
-    rules = capa.main.get_rules(rules, disable_progress=True)
-    rules = capa.rules.RuleSet(rules)
+
 
     storage = ZODB.FileStorage.FileStorage(path)
     db = ZODB.DB(storage)
@@ -65,11 +64,11 @@ def createobjectrules(path='mydata.fs',rules=''):
     return path
 
 
-def launch_capa(db_rules,path_rules, malware_dataset):
+def launch_capa(path_rules, malware_dataset):
     for root, dir, files in os.walk(malware_dataset):
             for name in files:
                 path_file = os.path.join(root, name)
-                capa_extraction.delay(db_rules,path_rules, path_file)
+                capa_extraction.delay(path_rules, path_file)
 
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')
@@ -91,6 +90,4 @@ if __name__ == '__main__':
     if args.label:
         label(debug=False)
     if args.capa and args.mlwdataset:
-        path = createobjectrules(rules=args.capa)
-        print('record rules %s' % path)
-        launch_capa(path, args.capa, args.mlwdataset)
+        launch_capa(args.capa, args.mlwdataset)

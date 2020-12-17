@@ -21,14 +21,9 @@ celery_backend = 'redis://127.0.0.1:6379/5'
 
 celery = Celery('tasks', broker=celery_broker, backend= celery_backend)
 @celery.task
-def capa_extraction(db_rules, path_rules, path_file):
-    storage = ZODB.FileStorage.FileStorage(db_rules)
-    db = ZODB.DB(storage)
-
-    con = db.open()
-
-    rules = con.root.rules
-
+def capa_extraction(path_rules, path_file):
+    rules = capa.main.get_rules(path_rules, disable_progress=True)
+    rules = capa.rules.RuleSet(rules)
     extractor = capa.main.get_extractor(path_file, 'auto', disable_progress=True)
     capabilities, counts = capa.main.find_capabilities(rules, extractor, disable_progress=True)
     meta = capa.main.collect_metadata('', path_file, path_rules, 'auto', extractor)

@@ -20,7 +20,7 @@ celery_broker = 'redis://127.0.0.1:6379/5'
 celery_backend = 'redis://127.0.0.1:6379/5'
 
 celery = Celery('tasks', broker=celery_broker, backend= celery_backend)
-@celery.task
+@celery.task(ignore_result=True)
 def capa_extraction(path_rules, path_file):
     rules = capa.main.get_rules(path_rules, disable_progress=True)
     rules = capa.rules.RuleSet(rules)

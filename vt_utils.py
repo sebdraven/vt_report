@@ -89,6 +89,7 @@ if __name__ == '__main__':
         vt_report_launcher(args.vt_report)
     if args.label:
         label(debug=False)
-    if args.capa:
+    if args.capa and args.mlwdataset:
         path = createobjectrules(rules=args.capa)
         print('record rules %s' % path)
+        launch_capa(path, malware_dataset=args.mlwdataset)

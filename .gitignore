@@ -5,3 +5,7 @@ jsons/*
 *.ipynb
 *.alias
 *.json
+.python-version
+mydata.*
+capa-rules/*
+capa-rules

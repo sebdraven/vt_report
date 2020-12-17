@@ -7,10 +7,13 @@ import time
 import os.path
 from redis import StrictRedis
 
-from vt_taskc import vt_report, push
+from vt_taskc import vt_report, push, capa_extraction
 from label import process
+import ZODB, ZODB.FileStorage
+import capa.rules
+import capa.main
 
-redis_client = StrictRedis()
+
 
 
 def all_files(path):
@@ -19,6 +22,7 @@ def all_files(path):
 
 
 def vt_report_launcher(api_key):
+    redis_client = StrictRedis()
     while True:
         h = redis_client.lpop('files')
         vt_report.delay(h.decode(), api_key)
@@ -45,11 +49,34 @@ def label(json_dir='jsons', debug=True):
         if number_file == 1:
             break
 
+def createobjectrules(path='mydata.fs', rules=''):
+    rules = capa.main.get_rules(rules, disable_progress=True)
+    rules = capa.rules.RuleSet(rules)
+
+    storage = ZODB.FileStorage.FileStorage(path)
+    db = ZODB.DB(storage)
+
+    con = db.open()
+    if con:
+        with db.transaction() as connection:
+            connection.root.rules = rules
+        db.close()
+    return path
+
+
+def launch_capa(path_rules, malware_dataset=''):
+    for root, dir, files in os.walk(malware_dataset):
+            for name in files:
+                path_file = os.path.join(root, name)
+                capa_extraction.delay(path_rules, path_file)
+
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')
     parser.add_argument('--record', dest='record', help='Command to record all files name in redis')
     parser.add_argument('--vt_report', dest='vt_report', help='Launch report catcher of VT')
     parser.add_argument('--label', dest='label', help='labelling vt report')
+    parser.add_argument('--capa', dest='capa', help='rules')
+    parser.add_argument('--malwaredataset', dest='mlwdataset', help='malwaredataset')
     args = parser.parse_args()
     return args
 
@@ -62,3 +89,6 @@ if __name__ == '__main__':
         vt_report_launcher(args.vt_report)
     if args.label:
         label(debug=False)
+    if args.capa:
+        path = createobjectrules(rules=args.capa)
+        print('record rules %s' % path)

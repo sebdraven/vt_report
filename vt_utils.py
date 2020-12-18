@@ -82,7 +82,7 @@ def filter_dataset(malware_dataset):
             path_dir = 'jsons_capa/%s/%s/%s/%s' % (name[0:2], name[2:4], name[4:6], name[6:8])
             file_capa = os.path.join(path_dir, '%s.capa' % name)
 
-            if not os.path.isfile(file_capa):
+            if not os.path.isfile(file_capa) and not path_file.endswith('viv'):
                 redis_client.rpush('files', path_file)
 
 

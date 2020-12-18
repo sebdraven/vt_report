@@ -74,22 +74,26 @@ def filter_dataset(malware_dataset):
     for root, dir, files in os.walk(malware_dataset):
         for name in files:
             path_file = os.path.join(root, name)
+            capa_record = False
             try:
                 pe = lief.parse(path_file)
             except:
-                continue
+                pass
+
 
             path_dir = 'jsons_capa/%s/%s/%s/%s' % (name[0:2], name[2:4], name[4:6], name[6:8])
             file_capa = os.path.join(path_dir, '%s.capa' % name)
 
-            if not os.path.isfile(file_capa) and not path_file.endswith('viv'):
+            if not os.path.isfile(file_capa) and not path_file.endswith('viv') and capa_record:
                 redis_client.rpush('files', path_file)
 
 
 def launch_capa(path_rule):
     redis_client = StrictRedis(db=6,decode_responses=True)
-    for path_file in redis_client.lpop('files'):
+    path_file = redis_client.lpop('files')
+    while path_file:
         capa_extraction.delay(path_rule, path_file)
+        path_file = redis_client.lpop('files')
 
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')

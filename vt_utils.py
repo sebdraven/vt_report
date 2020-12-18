@@ -98,7 +98,7 @@ def parse_command_line():
     parser.add_argument('--label', dest='label', help='labelling vt report')
     parser.add_argument('--capa', dest='capa', help='rules')
     parser.add_argument('--malwaredataset', dest='mlwdataset', help='malwaredataset')
-    parser.add_argument('--filter', dest='filter')
+    parser.add_argument('--filter', action='store_true', dest='filter')
     args = parser.parse_args()
     return args
 

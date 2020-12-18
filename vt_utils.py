@@ -77,6 +77,7 @@ def filter_dataset(malware_dataset):
             capa_record = False
             try:
                 pe = lief.parse(path_file)
+                capa_record = True
             except:
                 pass
 

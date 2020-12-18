@@ -13,7 +13,7 @@ from capa_workers import capa_extraction
 import ZODB, ZODB.FileStorage
 import capa.rules
 import capa.main
-
+import lief
 
 
 
@@ -52,7 +52,6 @@ def label(json_dir='jsons', debug=True):
 
 def createobjectrules(path='mydata.fs',rules=''):
 
-
     storage = ZODB.FileStorage.FileStorage(path)
     db = ZODB.DB(storage)
 
@@ -64,11 +63,27 @@ def createobjectrules(path='mydata.fs',rules=''):
     return path
 
 
-def launch_capa(path_rules, malware_dataset):
+def filter_dataset(malware_dataset):
+    redis_client = StrictRedis(db=6, decode_responses=True)
     for root, dir, files in os.walk(malware_dataset):
-            for name in files:
-                path_file = os.path.join(root, name)
-                capa_extraction.delay(path_rules, path_file)
+        for name in files:
+            path_file = os.path.join(root, name)
+            try:
+                pe = lief.parse(path_file)
+            except:
+                continue
+
+            path_dir = 'jsons_capa/%s/%s/%s/%s' % (name[0:2], name[2:4], name[4:6], name[6:8])
+            file_capa = os.path.join(path_dir, '%s.capa' % name)
+
+            if not os.path.isfile(file_capa):
+                redis_client.rpush('files', path_file)
+
+
+def launch_capa(path_rule):
+    redis_client = StrictRedis(db=6,decode_responses=True)
+    for path_file in redis_client.lpop('files'):
+        capa_extraction.delay(path_rule, path_file)
 
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')
@@ -77,6 +92,7 @@ def parse_command_line():
     parser.add_argument('--label', dest='label', help='labelling vt report')
     parser.add_argument('--capa', dest='capa', help='rules')
     parser.add_argument('--malwaredataset', dest='mlwdataset', help='malwaredataset')
+    parser.add_argument('--filter', dest='filter')
     args = parser.parse_args()
     return args
 
@@ -89,5 +105,7 @@ if __name__ == '__main__':
         vt_report_launcher(args.vt_report)
     if args.label:
         label(debug=False)
-    if args.capa and args.mlwdataset:
-        launch_capa(args.capa, args.mlwdataset)
+    if args.filter and args.mlwdataset:
+        filter_dataset(args.mlwdataset)
+    if args.capa:
+        launch_capa(args.capa)

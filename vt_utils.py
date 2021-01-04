@@ -10,7 +10,6 @@ from redis import StrictRedis
 from vt_taskc import vt_report, push
 from label import process
 
-
 try:
     from capa_workers import capa_extraction
     import ZODB, ZODB.FileStorage
@@ -22,10 +21,9 @@ except:
     pass
 
 
-
 def all_files(path):
     return [json.load(open(json_file))['sha256'] for json_file in glob.glob(path)
-             if os.path.isfile(json_file) and 'sha256' in json.load(open(json_file))]
+            if os.path.isfile(json_file) and 'sha256' in json.load(open(json_file))]
 
 
 def vt_report_launcher(api_key):
@@ -37,7 +35,6 @@ def vt_report_launcher(api_key):
 
 
 def record_file(malware_data='/data/malware_samples/DATASET'):
-
     number_file = 0
     for root, dirs, files in os.walk(malware_data):
         for name in files:
@@ -56,8 +53,8 @@ def label(json_dir='jsons', debug=True):
         if number_file == 1:
             break
 
-def createobjectrules(path='mydata.fs',rules=''):
 
+def createobjectrules(path='mydata.fs', rules=''):
     storage = ZODB.FileStorage.FileStorage(path)
     db = ZODB.DB(storage)
 
@@ -76,8 +73,6 @@ def filter_dataset(malware_dataset):
             path_file = os.path.join(root, name)
             capa_record = False
 
-
-
             path_dir = 'jsons_capa/%s/%s/%s/%s' % (name[0:2], name[2:4], name[4:6], name[6:8])
             file_capa = os.path.join(path_dir, '%s.capa' % name)
 
@@ -86,11 +81,12 @@ def filter_dataset(malware_dataset):
 
 
 def launch_capa(path_rule):
-    redis_client = StrictRedis(db=6,decode_responses=True)
+    redis_client = StrictRedis(db=6, decode_responses=True)
     path_file = redis_client.lpop('files')
     while path_file:
         capa_extraction.delay(path_rule, path_file)
         path_file = redis_client.lpop('files')
+
 
 def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
     stats_jsons_capa = 0
@@ -100,7 +96,8 @@ def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
 
     for root, dir, files in os.walk(jsons_report):
         stats_jsons_vt += len(files)
-    print('jsons capa: %s \n jsons vt: %s' % (stats_jsons_capa,stats_jsons_vt))
+    print('jsons capa: %s \n jsons vt: %s' % (stats_jsons_capa, stats_jsons_vt))
+
 
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')

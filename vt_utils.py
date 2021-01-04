@@ -93,10 +93,10 @@ def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
     stats_jsons_vt = 0
     for root, dir, files in os.walk(jsons_capa):
         stats_jsons_capa += len(files)
-
+    print('jsons capa: %s \n' % stats_jsons_capa)
     for root, dir, files in os.walk(jsons_report):
         stats_jsons_vt += len(files)
-    print('jsons capa: %s \n jsons vt: %s' % (stats_jsons_capa, stats_jsons_vt))
+    print('jsons vt: %s' %  stats_jsons_vt)
 
 
 def parse_command_line():

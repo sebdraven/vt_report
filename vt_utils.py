@@ -92,6 +92,16 @@ def launch_capa(path_rule):
         capa_extraction.delay(path_rule, path_file)
         path_file = redis_client.lpop('files')
 
+def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
+    stats_jsons_capa = 0
+    stats_jsons_vt = 0
+    for root, dir, files in os.walk(jsons_capa):
+        stats_jsons_capa += len(files)
+
+    for root, dir, files in os.walk(jsons_report):
+        stats_jsons_vt += len(files)
+    print('jsons capa: %s \n jsons vt: %s' % (stats_jsons_capa,stats_jsons_vt))
+
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')
     parser.add_argument('--record', dest='record', help='Command to record all files name in redis')
@@ -100,6 +110,7 @@ def parse_command_line():
     parser.add_argument('--capa', dest='capa', help='rules')
     parser.add_argument('--malwaredataset', dest='mlwdataset', help='malwaredataset')
     parser.add_argument('--filter', action='store_true', dest='filter')
+    parser.add_argument('--stats', action='store_true', dest='stats')
     args = parser.parse_args()
     return args
 
@@ -116,3 +127,5 @@ if __name__ == '__main__':
         filter_dataset(args.mlwdataset)
     if args.capa:
         launch_capa(args.capa)
+    if args.stats:
+        stats()

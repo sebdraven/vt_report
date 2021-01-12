@@ -83,7 +83,9 @@ def filter_dataset(malware_dataset):
 def launch_capa(path_rule):
     redis_client = StrictRedis(db=6, decode_responses=True)
     path_file = redis_client.lpop('files')
+
     while path_file:
+        if redis_client.hexists('files failed', path_file)
         capa_extraction.delay(path_rule, path_file)
         path_file = redis_client.lpop('files')
 
@@ -96,7 +98,7 @@ def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
     print('jsons capa: %s \n' % stats_jsons_capa)
     for root, dir, files in os.walk(jsons_report):
         stats_jsons_vt += len(files)
-    print('jsons vt: %s' %  stats_jsons_vt)
+    print('jsons vt: %s' % stats_jsons_vt)
 
 
 def parse_command_line():

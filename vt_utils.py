@@ -85,7 +85,7 @@ def launch_capa(path_rule):
     path_file = redis_client.lpop('files')
 
     while path_file:
-        if redis_client.hexists('files failed', path_file)
+        if redis_client.hexists('files failed', path_file):
         capa_extraction.delay(path_rule, path_file)
         path_file = redis_client.lpop('files')
 

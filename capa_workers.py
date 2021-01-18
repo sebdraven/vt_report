@@ -27,7 +27,7 @@ def capa_extraction(path_rules, path_file):
     client_redis = StrictRedis(db=6, decode_responses=True)
     rules = capa.main.get_rules(path_rules, disable_progress=True)
     rules = capa.rules.RuleSet(rules)
-
+    capa_json = None
     try:
         extractor = capa.main.get_extractor(path_file, 'auto', disable_progress=True)
         capabilities, counts = capa.main.find_capabilities(rules, extractor, disable_progress=True)

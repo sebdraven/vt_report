@@ -49,6 +49,7 @@ def capa_extraction(path_rules, path_file):
                 fw.write(capa_json)
                 logging.info('jsons results %s' % path_file_json)
                 fw.close()
+                client_redis.incr('nb_capa')
         except:
             logging.error('Bad recording %s' % path_file)
             pass

@@ -34,7 +34,7 @@ def capa_extraction(path_rules, path_file):
         meta = capa.main.collect_metadata('', path_file, path_rules, 'auto', extractor)
         capa_json = capa.render.render_json(meta, rules, capabilities)
     except:
-        client_redis.hset('file failed', key=path_file, value=True)
+        client_redis.hset('file failed', key=path_file, value=1)
 
     if capa_json:
         name_file = os.path.basename(path_file)

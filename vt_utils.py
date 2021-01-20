@@ -1,6 +1,7 @@
 import argparse
 import glob
 import json
+import logging
 import os
 import sys
 import time
@@ -88,6 +89,7 @@ def record_clean(malware_data='/data/malware_samples/DATASET'):
             if 'viv' in name:
                 path_file = os.path.join(root,name)
                 client_redis.rpush('clean', path_file)
+                logging.info('file %s is recorded' % path_file)
 
 
 def clean():

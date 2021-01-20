@@ -11,7 +11,7 @@ from vt_taskc import vt_report, push
 from label import process
 
 try:
-    from capa_workers import capa_extraction
+    from capa_workers import capa_extraction,clean_viv
     import ZODB, ZODB.FileStorage
     import capa.rules
     import capa.main
@@ -128,6 +128,8 @@ def parse_command_line():
     parser.add_argument('--malwaredataset', dest='mlwdataset', help='malwaredataset')
     parser.add_argument('--filter', action='store_true', dest='filter')
     parser.add_argument('--stats', action='store_true', dest='stats')
+    parser.add_argument('--clean', action='store_true', dest='clean')
+    parser.add_argument('--filter_clean', action='store_true', dest='flc')
     args = parser.parse_args()
     return args
 
@@ -146,3 +148,7 @@ if __name__ == '__main__':
         launch_capa(args.capa)
     if args.stats:
         stats()
+    if args.flc:
+        record_clean()
+    if args.clean:
+        clean()

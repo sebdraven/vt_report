@@ -81,6 +81,23 @@ def filter_dataset(malware_dataset):
                 redis_client.rpush('files', path_file)
 
 
+def record_clean(malware_data='/data/malware_samples/DATASET'):
+    client_redis = StrictRedis(db=6)
+    for root, dirs, files in os.walk(malware_data):
+        for name in files:
+            if 'viv' in name:
+                path_file = os.path.join(root,name)
+                client_redis.rpush('clean', path_file)
+
+
+def clean():
+    client_redis = StrictRedis(db=6)
+    path_file = client_redis.lpop('clean')
+    while path_file:
+        clean_viv.delay(path_file)
+        path_file = client_redis.lpop('clean')
+
+
 def launch_capa(path_rule):
     redis_client = StrictRedis(db=6, decode_responses=True)
     path_file = redis_client.lpop('files')

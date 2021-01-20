@@ -54,3 +54,13 @@ def capa_extraction(path_rules, path_file):
         except:
             logging.error('Bad recording %s' % path_file)
             pass
+
+@celery.task
+def clean_viv(path_file):
+
+    if os.path.isfile(path_file):
+        try:
+            os.remove(path_file)
+            logging.error('the file %s has been deleted' % path_file)
+        except:
+            logging.error('delete has failed %s' % path_file)

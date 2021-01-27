@@ -51,11 +51,11 @@ def capa_extraction(path_rules, path_file):
                 logging.info('jsons results %s' % path_file_json)
                 fw.close()
                 client_redis.incr('nb_capa')
-                path_file_viv = '%s' % path_file
+                path_file_viv = '%s.viv' % path_file
                 if os.path.isfile(path_file_viv):
                     os.remove(path_file_viv)
         except:
-            logging.error('Bad recording %s' % path_file)
+            logging.error('Bad recording %s' % path_file_json)
             pass
 
 @celery.task
@@ -64,6 +64,6 @@ def clean_viv(path_file):
     if os.path.isfile(path_file):
         try:
             os.remove(path_file)
-            logging.error('the file %s has been deleted' % path_file)
+            logging.warning('the file %s has been deleted' % path_file)
         except:
             logging.error('delete has failed %s' % path_file)

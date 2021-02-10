@@ -52,8 +52,11 @@ def capa_extraction(path_rules, path_file):
                 fw.close()
                 client_redis.incr('nb_capa')
                 path_file_viv = '%s.viv' % path_file
-                if os.path.isfile(path_file_viv):
-                    os.remove(path_file_viv)
+                try:
+                    if os.path.isfile(path_file_viv):
+                        os.remove(path_file_viv)
+                except:
+                    logging.error('Can\'t delete %s' % path_file_viv)
         except:
             logging.error('Bad recording %s' % path_file_json)
             pass

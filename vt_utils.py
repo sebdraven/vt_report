@@ -37,7 +37,7 @@ def vt_report_launcher(api_key):
 
 def record_file(malware_data='/data/malware_samples/DATASET'):
     number_file = 0
-    print('')
+    print('start record file')
     for root, dirs, files in os.walk(malware_data):
         for name in files:
             push.delay(name)

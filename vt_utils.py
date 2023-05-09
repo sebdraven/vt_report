@@ -40,7 +40,9 @@ def record_file(malware_data='/data/malware_samples/DATASET'):
     for root, dirs, files in os.walk(malware_data):
         for name in files:
             push.delay(name)
-
+            number_file += 1
+            if number_file % 10000 == 0:
+                print('number file to record %s' % number_file)
 
 def label(json_dir='jsons', debug=True):
     json_path = os.path.join(os.path.dirname(__file__), json_dir)

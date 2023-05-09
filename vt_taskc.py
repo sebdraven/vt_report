@@ -29,6 +29,7 @@ def push(name):
 
     if redis_client.llen('files') % 10000 == 0:
         print('number file to record %s' % redis_client.llen('files'))
+    return True
 
 @celery.task
 def vt_report(hash_file, api_key):

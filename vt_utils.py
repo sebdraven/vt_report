@@ -141,7 +141,10 @@ def parse_command_line():
 if __name__ == '__main__':
     args = parse_command_line()
     if args.record:
-        record_file()
+        if not args.mlwdataset:
+            record_file()
+        else:
+            record_file(malware_data=args.mlwdataset)
     if args.vt_report:
         vt_report_launcher(args.vt_report)
     if args.label:

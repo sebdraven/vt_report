@@ -51,7 +51,9 @@ def download_malware(access_key,secret_key,name_bucket,path_binarie, name_file,d
     )
         s3 = session.client('s3')
         path_zip = f"{dir_download}/{name_file}.zip"
-        s3.download_file(name_bucket, path_binarie, path_zip)
+        path_file= f"{path_binarie}/{name_file}"
+        logging.info(f"download {name_file}")
+        s3.download_file(name_bucket, path_file, path_zip)
         data = zlib.decompress(open(path_zip, 'rb').read())
         path_mwl = f"{dir_download}/{name_file}"
         fw = open(path_mwl, 'wb')

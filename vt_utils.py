@@ -167,7 +167,7 @@ if __name__ == '__main__':
         if not args.mlwdataset:
             record_file(args.max)
         else:
-            record_file(malware_data=args.mlwdataset)
+            record_file(args.max,malware_data=args.mlwdataset)
     if args.vt_report:
         vt_report_launcher(args.vt_report)
     if args.label:

@@ -12,7 +12,7 @@ from vt_taskc import vt_report, push,unzip_file
 from label import process
 
 try:
-    from capa_workers import capa_extraction,clean_viv
+    from vt_taskc import capa_extraction,clean_viv
     import ZODB, ZODB.FileStorage
     import capa.rules
     import capa.main

@@ -59,6 +59,7 @@ def download_malware(access_key,secret_key,name_bucket,path_binarie, name_file,d
         fw = open(path_mwl, 'wb')
         fw.write(data)
         fw.close()
+        os.remove(path_zip)
     except:
         redis_client.rpush('filesdl', name_file)
         logging.error(f"error download {name_file}")

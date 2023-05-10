@@ -13,7 +13,7 @@ import capa.features
 import capa.render
 from capa.engine import *
 import logging
-
+import zlib
 
 
 celery_broker = 'redis://127.0.0.1:6379/5'
@@ -30,7 +30,16 @@ def push(name):
     if redis_client.llen('files') % 10000 == 0:
         print('number file to record %s' % redis_client.llen('files'))
     return True
-
+@celery.task
+def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/'):
+    name_file = os.path.basename(path_file)
+    path_dir = os.path.join(dir_unzip, name_file)
+    data = zlib.decompress(open(path_file, 'rb').read())
+    fw = open(path_dir, 'wb')
+    fw.write(data)
+    fw.close()
+    return True
+    
 @celery.task
 def vt_report(hash_file, api_key):
     params = {'resource': hash_file,

@@ -8,7 +8,7 @@ import time
 import os.path
 from redis import StrictRedis
 
-from vt_taskc import vt_report, push
+from vt_taskc import vt_report, push,unzip_file
 from label import process
 
 try:
@@ -127,6 +127,12 @@ def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
         stats_jsons_vt += len(files)
     print('jsons vt: %s' % stats_jsons_vt)
 
+def unzip_launcher():
+    redis_client = StrictRedis(db=6, decode_responses=True)
+    path_file = redis_client.lpop('files')
+    while path_file:
+        unzip_file.delay(path_file)
+        path_file = redis_client.lpop('files')
 
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')
@@ -139,6 +145,7 @@ def parse_command_line():
     parser.add_argument('--stats', action='store_true', dest='stats')
     parser.add_argument('--clean', action='store_true', dest='clean')
     parser.add_argument('--filter_clean', action='store_true', dest='flc')
+    parser.add_argument('--unzip', action='store_true', dest='unzip')
     args = parser.parse_args()
     return args
 
@@ -164,3 +171,5 @@ if __name__ == '__main__':
         record_clean()
     if args.clean:
         clean()
+    if args.unzip:
+        unzip_launcher(args.mlwdataset)

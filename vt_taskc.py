@@ -24,7 +24,7 @@ celery = Celery('tasks', broker=celery_broker, backend= celery_backend)
 @celery.task
 
 def push(name):
-    redis_client = StrictRedis()
+    redis_client = StrictRedis(db=6 , decode_responses=True)
     redis_client.rpush('files', name)
 
     if redis_client.llen('files') % 10000 == 0:

@@ -37,9 +37,13 @@ def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/'):
     name_file = os.path.basename(path_file)
     path_dir = os.path.join(dir_unzip, name_file)
     data = zlib.decompress(open(path_file, 'rb').read())
-    fw = open(path_dir, 'wb')
-    fw.write(data)
-    fw.close()
+    pe = pefile.PE(data=data)
+    if pe.FILE_HEADER.IMAGE_32BIT_MACHINE:
+        pe.FILE_HEADER.Machine = 0x014c
+    else:
+        pe.FILE_HEADER.Machine = 0x8664
+    pe.write(path_dir)
+
     return True
 
 @celery.task

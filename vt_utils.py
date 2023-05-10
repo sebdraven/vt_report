@@ -172,4 +172,4 @@ if __name__ == '__main__':
     if args.clean:
         clean()
     if args.unzip:
-        unzip_launcher(args.mlwdataset)
+        unzip_launcher()

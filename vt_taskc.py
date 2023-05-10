@@ -61,9 +61,12 @@ def download_malware(access_key,secret_key,name_bucket,path_binarie, name_file,d
         s3.download_file(name_bucket, path_file, path_zip)
         data = zlib.decompress(open(path_zip, 'rb').read())
         path_mwl = f"{dir_download}/{name_file}"
-        fw = open(path_mwl, 'wb')
-        fw.write(data)
-        fw.close()
+        pe = pefile.PE(data=data)
+        if pe.FILE_HEADER.IMAGE_32BIT_MACHINE:
+            pe.FILE_HEADER.Machine = 0x014c
+        else:
+            pe.FILE_HEADER.Machine = 0x8664
+        pe.write(path_mwl)
         os.remove(path_zip)
     except:
         redis_client.rpush('filesdl', name_file)

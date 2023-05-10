@@ -41,7 +41,8 @@ def record_file(malware_data='/data/malware_samples/DATASET'):
     for root, dirs, files in os.walk(malware_data):
         for name in files:
             print('name file %s' % name)
-            push.delay(name)
+            path_file = os.path.join(root, name)
+            push.delay(path_file)
             number_file += 1
             if number_file % 10000 == 0:
                 print('number file to record %s' % number_file)

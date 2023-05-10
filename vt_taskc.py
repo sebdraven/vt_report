@@ -47,7 +47,7 @@ def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/'):
     return True
 
 @celery.task
-def download_malware(access_key,secret_key,name_bucket,path_binarie, name_file,dir_download='/mnt/pst/soreldataset/'):
+def download_malware(access_key,secret_key,name_bucket,path_binarie, name_file,dir_download='/mnt/pst/soreldataset'):
     redis_client = StrictRedis()
     try:
         session = boto3.Session(

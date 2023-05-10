@@ -153,6 +153,7 @@ def parse_command_line():
     parser.add_argument('--clean', action='store_true', dest='clean')
     parser.add_argument('--filter_clean', action='store_true', dest='flc')
     parser.add_argument('--unzip', action='store_true', dest='unzip')
+    parser.add_argument('--rw', action='store_true', dest='rewrite_header')
     args = parser.parse_args()
     return args
 
@@ -180,3 +181,5 @@ if __name__ == '__main__':
         clean()
     if args.unzip:
         unzip_launcher()
+    if args.rewrite_header:
+        rewrite_header()

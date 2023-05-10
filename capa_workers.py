@@ -38,7 +38,7 @@ def capa_extraction(path_rules, path_file):
 
     if capa_json:
         name_file = os.path.basename(path_file)
-        path_dir = 'jsons_capa'
+        path_dir = '/mnt/pst/jsons_capa'
         path_file_json = '%s.capa' % os.path.join(path_dir, name_file)
         try:
             fw = open(path_file_json, 'w')

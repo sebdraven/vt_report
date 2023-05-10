@@ -8,7 +8,7 @@ import time
 import os.path
 from redis import StrictRedis
 
-from vt_taskc import vt_report, push,unzip_file
+from vt_taskc import vt_report, push,unzip_file,rewrite_header_file
 from label import process
 
 try:
@@ -35,7 +35,7 @@ def vt_report_launcher(api_key):
         time.sleep(1)
 
 
-def record_file(malware_data='/data/malware_samples/DATASET'):
+def record_file(max,malware_data='/data/malware_samples/DATASET'):
     number_file = 0
     print('start record file')
     for root, dirs, files in os.walk(malware_data):
@@ -44,6 +44,8 @@ def record_file(malware_data='/data/malware_samples/DATASET'):
             path_file = os.path.join(root, name)
             push.delay(path_file)
             number_file += 1
+            if number_file == max:
+                break
             if number_file % 10000 == 0:
                 print('number file to record %s' % number_file)
 
@@ -144,6 +146,7 @@ def rewrite_header():
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')
     parser.add_argument('--record', dest='record',action='store_true' ,help='Command to record all files name in redis')
+    parser.add_argument('--max', dest='max', help='max number of file to record',default=10)
     parser.add_argument('--vt_report', dest='vt_report', help='Launch report catcher of VT')
     parser.add_argument('--label', dest='label', help='labelling vt report')
     parser.add_argument('--capa', dest='capa', help='rules')
@@ -162,7 +165,7 @@ if __name__ == '__main__':
     args = parse_command_line()
     if args.record:
         if not args.mlwdataset:
-            record_file()
+            record_file(args.max)
         else:
             record_file(malware_data=args.mlwdataset)
     if args.vt_report:

@@ -43,19 +43,23 @@ def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/'):
 
 @celery.task
 def download_malware(access_key,secret_key,name_bucket,path_binarie, name_file,dir_download='/mnt/pst/soreldataset/'):
-    
-    session = boto3.Session(
-    aws_access_key_id=access_key,
-    aws_secret_access_key=secret_key
-)
-    s3 = session.client('s3')
-    path_zip = f"{dir_download}/{name_file}.zip"
-    s3.download_file(name_bucket, path_binarie, path_zip)
-    data = zlib.decompress(open(path_zip, 'rb').read())
-    path_mwl = f"{dir_download}/{name_file}"
-    fw = open(path_mwl, 'wb')
-    fw.write(data)
-    fw.close()
+    redis_client = StrictRedis()
+    try:
+        session = boto3.Session(
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key
+    )
+        s3 = session.client('s3')
+        path_zip = f"{dir_download}/{name_file}.zip"
+        s3.download_file(name_bucket, path_binarie, path_zip)
+        data = zlib.decompress(open(path_zip, 'rb').read())
+        path_mwl = f"{dir_download}/{name_file}"
+        fw = open(path_mwl, 'wb')
+        fw.write(data)
+        fw.close()
+    except:
+        redis_client.rpush('filesdl', name_file)
+        return False
 
    
     return True

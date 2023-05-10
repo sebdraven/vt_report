@@ -134,6 +134,13 @@ def unzip_launcher():
         unzip_file.delay(path_file)
         path_file = redis_client.lpop('files')
 
+def rewrite_header():
+    redis_client = StrictRedis(db=6, decode_responses=True)
+    path_file = redis_client.lpop('files')
+    while path_file:
+        rewrite_header_file.delay(path_file)
+        path_file = redis_client.lpop('files')
+
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')
     parser.add_argument('--record', dest='record',action='store_true' ,help='Command to record all files name in redis')

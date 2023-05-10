@@ -15,6 +15,7 @@ from capa.engine import *
 import logging
 import zlib
 import boto3
+import pefile
 
 
 celery_broker = 'redis://127.0.0.1:6379/5'
@@ -86,8 +87,9 @@ def vt_report(hash_file, api_key):
 
 
 @celery.task(ignore_result=True, max_retries=3, time_limite=70)
-def capa_extraction(path_rules, path_file):
+def capa_extraction(path_rules, path_file,path_signatures):
     client_redis = StrictRedis(db=6, decode_responses=True)
+    sigs = capa.main.get_signatures(path_signatures)
     rules = capa.main.get_rules(path_rules, disable_progress=True)
     rules = capa.rules.RuleSet(rules)
     capa_json = None
@@ -121,6 +123,20 @@ def capa_extraction(path_rules, path_file):
             pass
     else:
         return False
+
+@celery.task
+def rewrite_header_file(path_file):
+    try:
+        data = open(path_file, 'rb').read()
+
+        pe = pefile.PE(data=data)
+        if pe.FILE_HEADER.IMAGE_FILE_32BIT_MACHINE:
+            pe.FILE_HEADER.Machine = 0x14c
+            pe.write(filename=path_file)
+            pe.close()
+    except:
+        logging.error('error reformat %s' % path_file)
+        pass
 
 @celery.task
 def clean_viv(path_file):

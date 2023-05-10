@@ -126,12 +126,17 @@ def capa_extraction(path_rules, path_file,path_signatures):
 
 @celery.task
 def rewrite_header_file(path_file):
+    
     try:
         data = open(path_file, 'rb').read()
 
         pe = pefile.PE(data=data)
         if pe.FILE_HEADER.IMAGE_FILE_32BIT_MACHINE:
             pe.FILE_HEADER.Machine = 0x14c
+            pe.write(filename=path_file)
+            pe.close()
+        else:
+            pe.FILE_HEADER.Machine = 0x8664
             pe.write(filename=path_file)
             pe.close()
     except:

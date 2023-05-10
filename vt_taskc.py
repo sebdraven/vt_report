@@ -119,6 +119,8 @@ def capa_extraction(path_rules, path_file):
         except:
             logging.error('Bad recording %s' % path_file_json)
             pass
+    else:
+        return False
 
 @celery.task
 def clean_viv(path_file):

@@ -16,6 +16,7 @@ import logging
 import zlib
 import boto3
 import pefile
+import shutil
 
 
 celery_broker = 'redis://127.0.0.1:6379/5'
@@ -33,16 +34,19 @@ def push(name):
         print('number file to record %s' % redis_client.llen('files'))
     return True
 @celery.task
-def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/'):
+def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/', malware_dataset='/mnt/pst/soreldataset'):
     name_file = os.path.basename(path_file)
-    path_dir = os.path.join(dir_unzip, name_file)
+    
+    hash_file = name_file.split('.')[0]
+    path_unzip_file = os.path.join(dir_unzip,hash_file)
     data = zlib.decompress(open(path_file, 'rb').read())
     pe = pefile.PE(data=data)
     if pe.FILE_HEADER.IMAGE_FILE_32BIT_MACHINE:
         pe.FILE_HEADER.Machine = 0x014c
     else:
         pe.FILE_HEADER.Machine = 0x8664
-    pe.write(filename=path_dir)
+    pe.write(filename=path_unzip_file)
+    shutil.move(path_unzip_file, os.path.join(malware_dataset,hash_file))
     return True
 
 @celery.task

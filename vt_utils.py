@@ -155,7 +155,17 @@ def move_unzip_file(directory_unzip='/mnt/pst/dataset/sorel_unzip/',malwaredatas
             print('path to move %s %s' %(path_file,path_to_move))
             shutil.move(path_file,path_to_move)
         
-
+def remove_duplicate(malwaredataset='/mnt/pst/soreldataset/'):
+    for root,dirs,files in os.walk(malwaredataset):
+        for name in files:
+            path_file = os.path.join(root,name)
+            if path_file.endswith('.zip'):
+                name_file  = os.path.basename(path_file)
+                hash_file = name_file.split('.')[0]
+                path_file_unzip = os.path.join(root,hash_file)
+                if os.path.isfile(path_file_unzip):
+                    print('remove %s' % path_file)
+                    #os.remove(path_file)
 def rewrite_header():
     redis_client = StrictRedis(db=6, decode_responses=True)
     path_file = redis_client.lpop('files')
@@ -179,6 +189,7 @@ def parse_command_line():
     parser.add_argument('--rw', action='store_true', dest='rewrite_header')
     parser.add_argument('--lz', action='store_true', dest='load_zip')
     parser.add_argument('--mv', action='store_true', dest='move_unzip')
+    parser.add_argument('--rm', action='store_true', dest='remove_duplicate')
     args = parser.parse_args()
     return args
 
@@ -212,3 +223,5 @@ if __name__ == '__main__':
         load_zip()
     if args.move_unzip:
         move_unzip_file()
+    if args.remove_duplicate:
+        remove_duplicate()

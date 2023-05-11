@@ -82,10 +82,13 @@ def download_malware(access_key,secret_key,name_bucket,path_binarie, name_file,d
     
     
 @celery.task
-def check_file_exists(bucket_name, file_key):
+def check_file_exists(bucket_name, file_key, access_key, secret_key):
     client_redis = StrictRedis(db=6, decode_responses=True)
-
-    s3 = boto3.client('s3')
+    session = boto3.Session(
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key
+    )
+    s3 = session.client('s3')
     try:
         s3.head_object(Bucket=bucket_name, Key=file_key)
         print("Le fichier existe sur S3.")

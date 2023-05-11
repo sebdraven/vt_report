@@ -134,6 +134,7 @@ def load_zip(malwaredataset='/mnt/pst/soreldataset/'):
     for root, dirs, files in os.walk(malwaredataset):
         for name in files:
             path_file = os.path.join(root, name)
+            print("path file %s" % path_file")
             if path_file.endswith('.zip'):
                 redis_client.rpush('files', path_file)
 

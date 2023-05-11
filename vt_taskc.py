@@ -85,7 +85,6 @@ def download_malware(access_key,secret_key,name_bucket,path_file, name_file,dir_
             # Gérer d'autres exceptions ici si nécessaire
             print("Une erreur s'est produite :", e)
             return False
-        return Fals
    
     return True
     

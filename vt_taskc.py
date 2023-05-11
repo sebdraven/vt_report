@@ -38,7 +38,7 @@ def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/'):
     path_dir = os.path.join(dir_unzip, name_file)
     data = zlib.decompress(open(path_file, 'rb').read())
     pe = pefile.PE(data=data)
-    if pe.FILE_HEADER.IMAGE_32BIT_MACHINE:
+    if pe.FILE_HEADER.IMAGE_FILE_32BIT_MACHINE:
         pe.FILE_HEADER.Machine = 0x014c
     else:
         pe.FILE_HEADER.Machine = 0x8664
@@ -61,7 +61,7 @@ def download_malware(access_key,secret_key,name_bucket,path_binarie, name_file,d
         data = zlib.decompress(open(path_zip, 'rb').read())
         path_mwl = f"{dir_download}/{name_file}"
         pe = pefile.PE(data=data)
-        if pe.FILE_HEADER.IMAGE_32BIT_MACHINE:
+        if pe.FILE_HEADER.IMAGE_FILE_32BIT_MACHINE:
             pe.FILE_HEADER.Machine = 0x014c
         else:
             pe.FILE_HEADER.Machine = 0x8664

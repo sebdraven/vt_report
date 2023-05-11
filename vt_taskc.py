@@ -82,6 +82,31 @@ def download_malware(access_key,secret_key,name_bucket,path_binarie, name_file,d
     
     
 @celery.task
+def check_file_exists(bucket_name, file_key):
+    client_redis = StrictRedis(db=6, decode_responses=True)
+
+    s3 = boto3.client('s3')
+    try:
+        s3.head_object(Bucket=bucket_name, Key=file_key)
+        print("Le fichier existe sur S3.")
+        client_redis.rpush('filesdl', file_key)
+        return True
+    except Exception as e:
+        if e.response['Error']['Code'] == '404':
+            print("Le fichier n'existe pas sur S3.")
+            client_redis.rpush('files_not_found', file_key)
+            return False
+        if e.response['Error']['Code'] == '403':
+            client_redis.rpush('files_forbidden', file_key) 
+            return False
+        else:
+            # Gérer d'autres exceptions ici si nécessaire
+            print("Une erreur s'est produite :", e)
+            return False
+
+
+
+@celery.task
 def vt_report(hash_file, api_key):
     params = {'resource': hash_file,
               'apikey': api_key}

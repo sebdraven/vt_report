@@ -166,6 +166,7 @@ def remove_duplicate(malwaredataset='/mnt/pst/soreldataset/'):
                 if os.path.isfile(path_file_unzip):
                     print('remove %s' % path_file)
                     os.remove(path_file)
+
 def rewrite_header():
     redis_client = StrictRedis(db=6, decode_responses=True)
     path_file = redis_client.lpop('files')

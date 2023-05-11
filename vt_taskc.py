@@ -52,7 +52,7 @@ def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/', malware_data
 
 @celery.task(ignore_result=True)
 def download_malware(access_key,secret_key,name_bucket,path_file, name_file,dir_download='/mnt/pst/soreldataset'):
-    redis_client = StrictRedis()
+    client_redis = StrictRedis(db=6, decode_responses=True)
     try:
         session = boto3.Session(
         aws_access_key_id=access_key,
@@ -72,11 +72,20 @@ def download_malware(access_key,secret_key,name_bucket,path_file, name_file,dir_
             pe.FILE_HEADER.Machine = 0x8664
         pe.write(filename=path_mwl)
         os.remove(path_zip)
-    except:
-        redis_client.rpush('filesdl', name_file)
-        logging.error(f"error download {name_file}")
-        return False
-
+        self.redis_client.rpush('files_success', path_file)
+    except Exception as e:
+        if e.response['Error']['Code'] == '404':
+            print("Le fichier n'existe pas sur S3.")
+            client_redis.rpush('files_not_found', path_file)
+            return False
+        if e.response['Error']['Code'] == '403':
+            client_redis.rpush('files_forbidden', file_key) 
+            return False
+        else:
+            # Gérer d'autres exceptions ici si nécessaire
+            print("Une erreur s'est produite :", e)
+            return False
+        return Fals
    
     return True
     

@@ -129,6 +129,14 @@ def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
         stats_jsons_vt += len(files)
     print('jsons vt: %s' % stats_jsons_vt)
 
+def load_zip(malwaredataset='/mnt/pst/soreldataset/'):
+    redis_client = StrictRedis(db=6, decode_responses=True)
+    for root, dirs, files in os.walk(malwaredataset):
+        for name in files:
+            path_file = os.path.join(root, name)
+            if path_file.endswith('.zip'):
+                redis_client.rpush('files', path_file)
+
 def unzip_launcher():
     redis_client = StrictRedis(db=6, decode_responses=True)
     path_file = redis_client.lpop('files')
@@ -157,6 +165,7 @@ def parse_command_line():
     parser.add_argument('--filter_clean', action='store_true', dest='flc')
     parser.add_argument('--unzip', action='store_true', dest='unzip')
     parser.add_argument('--rw', action='store_true', dest='rewrite_header')
+    parser.add_argument('--lz', action='store_true', dest='load_zip')
     args = parser.parse_args()
     return args
 
@@ -186,3 +195,5 @@ if __name__ == '__main__':
         unzip_launcher()
     if args.rewrite_header:
         rewrite_header()
+    if args.load_zip:
+        load_zip()

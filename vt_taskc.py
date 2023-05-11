@@ -42,8 +42,7 @@ def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/'):
         pe.FILE_HEADER.Machine = 0x014c
     else:
         pe.FILE_HEADER.Machine = 0x8664
-    pe.write(path_dir)
-
+    pe.write(filename=path_dir)
     return True
 
 @celery.task
@@ -66,7 +65,7 @@ def download_malware(access_key,secret_key,name_bucket,path_binarie, name_file,d
             pe.FILE_HEADER.Machine = 0x014c
         else:
             pe.FILE_HEADER.Machine = 0x8664
-        pe.write(path_mwl)
+        pe.write(filename=path_mwl)
         os.remove(path_zip)
     except:
         redis_client.rpush('filesdl', name_file)

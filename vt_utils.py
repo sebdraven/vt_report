@@ -153,6 +153,7 @@ def move_unzip_file(directory_unzip='/mnt/pst/dataset/sorel_unzip/',malwaredatas
             hash_file = name.split('.')[0]
             path_to_move = os.path.join(malwaredataset,hash_file)
             print('path to move %s' % path_to_move)
+            shutil.move(path_file,path_to_move)
         
 
 def rewrite_header():

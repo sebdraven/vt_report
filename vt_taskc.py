@@ -11,6 +11,7 @@ import capa.rules
 import capa.engine
 import capa.features
 import capa.render
+from capa.main import compute_layout
 from capa.engine import *
 import logging
 import zlib
@@ -24,7 +25,7 @@ celery_backend = 'redis://127.0.0.1:6379/5'
 
 celery = Celery('tasks', broker=celery_broker, backend= celery_backend)
 
-@celery.task
+@celery.task(ignore_result=True)
 
 def push(name):
     redis_client = StrictRedis(db=6 , decode_responses=True)
@@ -33,7 +34,7 @@ def push(name):
     if redis_client.llen('files') % 10000 == 0:
         print('number file to record %s' % redis_client.llen('files'))
     return True
-@celery.task
+@celery.task(ignore_result=True)
 def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/', malware_dataset='/mnt/pst/soreldataset'):
     name_file = os.path.basename(path_file)
     
@@ -49,7 +50,7 @@ def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/', malware_data
     shutil.move(path_unzip_file, os.path.join(malware_dataset,hash_file))
     return True
 
-@celery.task
+@celery.task(ignore_result=True)
 def download_malware(access_key,secret_key,name_bucket,path_file, name_file,dir_download='/mnt/pst/soreldataset'):
     redis_client = StrictRedis()
     try:
@@ -81,7 +82,7 @@ def download_malware(access_key,secret_key,name_bucket,path_file, name_file,dir_
     
     
     
-@celery.task
+@celery.task(ignore_result=True)
 def check_file_exists(bucket_name, file_key, access_key, secret_key):
     client_redis = StrictRedis(db=6, decode_responses=True)
     session = boto3.Session(
@@ -128,14 +129,17 @@ def vt_report(hash_file, api_key):
 def capa_extraction(path_rules, path_file,path_signatures):
     client_redis = StrictRedis(db=6, decode_responses=True)
     sigs = capa.main.get_signatures(path_signatures)
-    rules = capa.main.get_rules(path_rules, disable_progress=True)
-    rules = capa.rules.RuleSet(rules)
+    rules = capa.main.get_rules([path_rules])
+  
     capa_json = None
     try:
-        extractor = capa.main.get_extractor(path_file, 'auto', disable_progress=True)
+        extractor = capa.main.get_extractor(path_file, 'auto','windows','vivisect', sigs,disable_progress=True)
         capabilities, counts = capa.main.find_capabilities(rules, extractor, disable_progress=True)
-        meta = capa.main.collect_metadata('', path_file, path_rules, 'auto', extractor)
-        capa_json = capa.render.render_json(meta, rules, capabilities)
+        meta = capa.main.collect_metadata(sys.argv, path_file,'pe','windows', [path_rules], extractor)
+        meta["analysis"].update(counts)
+        meta["analysis"]["layout"] = compute_layout(rules, extractor, capabilities)
+        capa_json=capa.render.json.render(meta, rules, capabilities)
+
     except:
         client_redis.hset('file failed', key=path_file, value=1)
 
@@ -162,7 +166,7 @@ def capa_extraction(path_rules, path_file,path_signatures):
     else:
         return False
 
-@celery.task
+@celery.task(ignore_result=True)
 def rewrite_header_file(path_file):
     
     try:

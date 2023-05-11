@@ -72,14 +72,14 @@ def download_malware(access_key,secret_key,name_bucket,path_file, name_file,dir_
             pe.FILE_HEADER.Machine = 0x8664
         pe.write(filename=path_mwl)
         os.remove(path_zip)
-        self.redis_client.rpush('files_success', path_file)
+        client_redis.incr('files_success')
     except Exception as e:
         if e.response['Error']['Code'] == '404':
             print("Le fichier n'existe pas sur S3.")
             client_redis.rpush('files_not_found', path_file)
             return False
         if e.response['Error']['Code'] == '403':
-            client_redis.rpush('files_forbidden', file_key) 
+            client_redis.rpush('files_forbidden', path_file) 
             return False
         else:
             # Gérer d'autres exceptions ici si nécessaire

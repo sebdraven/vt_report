@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import time
+import shutil
 import os.path
 from redis import StrictRedis
 
@@ -145,6 +146,15 @@ def unzip_launcher():
         unzip_file.delay(path_file)
         path_file = redis_client.lpop('files')
 
+def move_unzip_file(directory_unzip='/mnt/pst/dataset/sorel_unzip/',malwaredataset='/mnt/pst/soreldataset/'):
+    for root,dirs, files in os.walk(directory_unzip):
+        for name in files:
+            path_file = os.path.join(root, name)
+            hash_file = name.split('.')[0]
+            path_to_move = os.path.join(malwaredataset,hash_file)
+            print('path to move %s' % path_to_move)
+        
+
 def rewrite_header():
     redis_client = StrictRedis(db=6, decode_responses=True)
     path_file = redis_client.lpop('files')
@@ -167,6 +177,7 @@ def parse_command_line():
     parser.add_argument('--unzip', action='store_true', dest='unzip')
     parser.add_argument('--rw', action='store_true', dest='rewrite_header')
     parser.add_argument('--lz', action='store_true', dest='load_zip')
+    parser.add_argument('--mv', action='store_true', dest='move_unzip')
     args = parser.parse_args()
     return args
 
@@ -198,3 +209,5 @@ if __name__ == '__main__':
         rewrite_header()
     if args.load_zip:
         load_zip()
+    if args.move_unzip:
+        move_unzip_file()

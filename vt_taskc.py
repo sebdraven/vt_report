@@ -143,7 +143,7 @@ def capa_extraction(path_file,path_rules='/mnt/pst/capa-rules-5.1.0/',path_signa
     try:
         extractor = capa.main.get_extractor(path_file, 'auto','windows','vivisect', sigs,disable_progress=True)
         capabilities, counts = capa.main.find_capabilities(rules, extractor, disable_progress=True)
-        meta = capa.main.collect_metadata(sys.argv, path_file,'pe','windows', [path_rules], extractor)
+        meta = capa.main.collect_metadata(['lib'], path_file,'pe','windows', [path_rules], extractor)
         meta["analysis"].update(counts)
         meta["analysis"]["layout"] = compute_layout(rules, extractor, capabilities)
         capa_json=capa.render.json.render(meta, rules, capabilities)

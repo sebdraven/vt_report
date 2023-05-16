@@ -110,13 +110,13 @@ def clean():
         path_file = client_redis.lpop('clean')
 
 
-def launch_capa(path_rule):
+def launch_capa():
     redis_client = StrictRedis(db=6, decode_responses=True)
     path_file = redis_client.lpop('files')
 
     while path_file:
         if not redis_client.hexists('files failed', path_file):
-            capa_extraction.delay(path_rule, path_file)
+            capa_extraction.delay(path_file)
             path_file = redis_client.lpop('files')
 
 

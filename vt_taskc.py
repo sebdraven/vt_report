@@ -35,7 +35,7 @@ def push(name):
         print('number file to record %s' % redis_client.llen('files'))
     return True
 @celery.task(ignore_result=True)
-def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/', malware_dataset='/mnt/pst/soreldataset'):
+def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/', malware_dataset='/mnt/data/soreldataset'):
     name_file = os.path.basename(path_file)
     
     hash_file = name_file.split('.')[0]
@@ -51,7 +51,7 @@ def unzip_file(path_file,dir_unzip='/mnt/pst/dataset/sorel_unzip/', malware_data
     return True
 
 @celery.task(ignore_result=True)
-def download_malware(access_key,secret_key,name_bucket,path_file, name_file,dir_download='/mnt/pst/soreldataset'):
+def download_malware(access_key,secret_key,name_bucket,path_file, name_file,dir_download='/mnt/data/soreldataset'):
     client_redis = StrictRedis(db=6, decode_responses=True)
     try:
         session = boto3.Session(
@@ -134,7 +134,7 @@ def vt_report(hash_file, api_key):
 
 
 @celery.task(ignore_result=True, max_retries=3, time_limite=70)
-def capa_extraction(path_file,path_rules='/mnt/pst/capa-rules-5.1.0/',path_signatures='/mnt/pst/capa-5.1.0/sigs'):
+def capa_extraction(path_file,path_rules='/mnt/data/capa-rules-5.1.0/',path_signatures='/mnt/data/capa-5.1.0/sigs'):
     client_redis = StrictRedis(db=6, decode_responses=True)
     sigs = capa.main.get_signatures(path_signatures)
     rules = capa.main.get_rules([path_rules])
@@ -153,7 +153,7 @@ def capa_extraction(path_file,path_rules='/mnt/pst/capa-rules-5.1.0/',path_signa
 
     if capa_json:
         name_file = os.path.basename(path_file)
-        path_dir = '/mnt/pst/jsons_capa'
+        path_dir = '/mnt/data/jsons_capa'
         path_file_json = '%s.capa' % os.path.join(path_dir, name_file)
         try:
             fw = open(path_file_json, 'w')

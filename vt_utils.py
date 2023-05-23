@@ -41,10 +41,10 @@ def record_file(max,malware_data='/mnt/data/soreldataset', json_dir='/mnt/data/j
     print('start record file')
     for root, dirs, files in os.walk(malware_data):
         for name in files:
-            print('name file %s' % name)
             path_file = os.path.join(root, name)
             capa_file = os.path.join(json_dir, '%s.capa' % name)
             if not os.path.isfile(capa_file):
+                print('record file %s' % capa_file)
                 push.delay(path_file)
                 number_file += 1
                 if number_file == max:

@@ -36,7 +36,7 @@ def vt_report_launcher(api_key):
         time.sleep(1)
 
 
-def record_file(max,malware_data='/mnt/data/soreldataset', json_dir='/mnt/pst/jsons_capa'):
+def record_file(max,malware_data='/mnt/data/soreldataset', json_dir='/mnt/data/jsons_capa'):
     number_file = 0
     print('start record file')
     for root, dirs, files in os.walk(malware_data):
@@ -132,7 +132,7 @@ def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
         stats_jsons_vt += len(files)
     print('jsons vt: %s' % stats_jsons_vt)
 
-def load_zip(malwaredataset='/mnt/pst/soreldataset/'):
+def load_zip(malwaredataset='/mnt/data/soreldataset/'):
     redis_client = StrictRedis(db=6, decode_responses=True)
     for root, dirs, files in os.walk(malwaredataset):
         for name in files:
@@ -157,7 +157,7 @@ def move_unzip_file(directory_unzip='/mnt/pst/dataset/sorel_unzip/',malwaredatas
             print('path to move %s %s' %(path_file,path_to_move))
             shutil.move(path_file,path_to_move)
         
-def remove_duplicate(malwaredataset='/mnt/pst/soreldataset/'):
+def remove_duplicate(malwaredataset='/mnt/data/soreldataset/'):
     for root,dirs,files in os.walk(malwaredataset):
         for name in files:
             path_file = os.path.join(root,name)

@@ -134,7 +134,7 @@ def vt_report(hash_file, api_key):
 
 
 @celery.task(ignore_result=True, max_retries=3, time_limite=70)
-def capa_extraction(path_rules, path_file,path_signatures):
+def capa_extraction(path_file,path_rules='/mnt/pst/capa-rules-5.1.0/',path_signatures='/mnt/pst/capa-5.1.0/sigs'):
     client_redis = StrictRedis(db=6, decode_responses=True)
     sigs = capa.main.get_signatures(path_signatures)
     rules = capa.main.get_rules([path_rules])
@@ -143,7 +143,7 @@ def capa_extraction(path_rules, path_file,path_signatures):
     try:
         extractor = capa.main.get_extractor(path_file, 'auto','windows','vivisect', sigs,disable_progress=True)
         capabilities, counts = capa.main.find_capabilities(rules, extractor, disable_progress=True)
-        meta = capa.main.collect_metadata(sys.argv, path_file,'pe','windows', [path_rules], extractor)
+        meta = capa.main.collect_metadata(['lib'], path_file,'pe','windows', [path_rules], extractor)
         meta["analysis"].update(counts)
         meta["analysis"]["layout"] = compute_layout(rules, extractor, capabilities)
         capa_json=capa.render.json.render(meta, rules, capabilities)

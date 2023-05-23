@@ -112,13 +112,13 @@ def clean():
         path_file = client_redis.lpop('clean')
 
 
-def launch_capa(path_rule):
+def launch_capa():
     redis_client = StrictRedis(db=6, decode_responses=True)
     path_file = redis_client.lpop('files')
 
     while path_file:
         if not redis_client.hexists('files failed', path_file):
-            capa_extraction.delay(path_rule, path_file)
+            capa_extraction.delay(path_file)
             path_file = redis_client.lpop('files')
 
 
@@ -182,7 +182,7 @@ def parse_command_line():
     parser.add_argument('--max', dest='max', help='max number of file to record',default=10)
     parser.add_argument('--vt_report', dest='vt_report', help='Launch report catcher of VT')
     parser.add_argument('--label', dest='label', help='labelling vt report')
-    parser.add_argument('--capa', dest='capa', help='rules')
+    parser.add_argument('--capa', dest='capa', action='store_true', help='capa extraction')
     parser.add_argument('--malwaredataset', dest='mlwdataset', help='malwaredataset')
     parser.add_argument('--filter', action='store_true', dest='filter')
     parser.add_argument('--stats', action='store_true', dest='stats')
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     if args.filter and args.mlwdataset:
         filter_dataset(args.mlwdataset)
     if args.capa:
-        launch_capa(args.capa)
+        launch_capa()
     if args.stats:
         stats()
     if args.flc:

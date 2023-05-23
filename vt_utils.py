@@ -36,19 +36,21 @@ def vt_report_launcher(api_key):
         time.sleep(1)
 
 
-def record_file(max,malware_data='/data/malware_samples/DATASET'):
+def record_file(max,malware_data='/data/malware_samples/DATASET', json_dir='/mnt/pst/jsons_capa'):
     number_file = 0
     print('start record file')
     for root, dirs, files in os.walk(malware_data):
         for name in files:
             print('name file %s' % name)
             path_file = os.path.join(root, name)
-            push.delay(path_file)
-            number_file += 1
-            if number_file == max:
-                break
-            if number_file % 10000 == 0:
-                print('number file to record %s' % number_file)
+            capa_file = os.path.join(json_dir, '%s.capa' % name)
+            if not os.path.isfile(capa_file):
+                push.delay(path_file)
+                number_file += 1
+                if number_file == max:
+                    break
+                if number_file % 10000 == 0:
+                    print('number file to record %s' % number_file)
 
 def label(json_dir='jsons', debug=True):
     json_path = os.path.join(os.path.dirname(__file__), json_dir)

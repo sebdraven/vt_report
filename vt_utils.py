@@ -36,7 +36,7 @@ def vt_report_launcher(api_key):
         time.sleep(1)
 
 
-def record_file(max,malware_data='/data/malware_samples/DATASET', json_dir='/mnt/pst/jsons_capa'):
+def record_file(max,malware_data='/mnt/data/soreldataset', json_dir='/mnt/pst/jsons_capa'):
     number_file = 0
     print('start record file')
     for root, dirs, files in os.walk(malware_data):

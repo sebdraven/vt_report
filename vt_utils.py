@@ -179,7 +179,7 @@ def rewrite_header():
 def parse_command_line():
     parser = argparse.ArgumentParser(description='VT Labelling')
     parser.add_argument('--record', dest='record',action='store_true' ,help='Command to record all files name in redis')
-    parser.add_argument('--max', dest='max', help='max number of file to record',default=10)
+    parser.add_argument('--max', dest='max', help='max number of file to record',type=int,default=10)
     parser.add_argument('--vt_report', dest='vt_report', help='Launch report catcher of VT')
     parser.add_argument('--label', dest='label', help='labelling vt report')
     parser.add_argument('--capa', dest='capa', action='store_true', help='capa extraction')

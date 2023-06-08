@@ -26,7 +26,6 @@ celery_backend = 'redis://127.0.0.1:6379/5'
 celery = Celery('tasks', broker=celery_broker, backend= celery_backend)
 
 @celery.task(ignore_result=True)
-
 def push(name):
     redis_client = StrictRedis(db=6 , decode_responses=True)
     redis_client.rpush('files', name)

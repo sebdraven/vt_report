@@ -121,7 +121,15 @@ def launch_capa():
             capa_extraction.delay(path_file)
             path_file = redis_client.lpop('files')
 
+def load_files(path_file,malwaredataset='/mnt/data/soreldataset/'):
+    redis_client = StrictRedis(db=6, decode_responses=True)
 
+    with open(path_file, 'r') as f:
+        for line in f.readlines():
+            path_ml = os.join(malwaredataset,line.strip())
+            redis_client.rpush('files',path_ml)
+
+            
 def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
     stats_jsons_capa = 0
     stats_jsons_vt = 0
@@ -193,6 +201,7 @@ def parse_command_line():
     parser.add_argument('--lz', action='store_true', dest='load_zip')
     parser.add_argument('--mv', action='store_true', dest='move_unzip')
     parser.add_argument('--rm', action='store_true', dest='remove_duplicate')
+    parser.add_argument('--load', dest='load', help='load files in redis')
     args = parser.parse_args()
     return args
 
@@ -228,3 +237,5 @@ if __name__ == '__main__':
         move_unzip_file()
     if args.remove_duplicate:
         remove_duplicate()
+    if args.load:
+        load_files(args.load)

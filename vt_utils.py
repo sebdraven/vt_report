@@ -127,8 +127,9 @@ def load_files(path_file,malwaredataset='/mnt/data/soreldataset/'):
     with open(path_file, 'r') as f:
         for line in f.readlines():
             path_ml = os.join(malwaredataset,line.strip())
-            redis_client.rpush('files',path_ml)
-            print('file %s is recorded' % path_ml)
+            if os.path.isfile(path_ml):
+                redis_client.rpush('files',path_ml)
+                print('file %s is recorded' % path_ml)
 
             
 def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
@@ -164,7 +165,7 @@ def move_unzip_file(directory_unzip='/mnt/pst/dataset/sorel_unzip/',malwaredatas
             hash_file = name.split('.')[0]
             path_to_move = os.path.join(malwaredataset,hash_file)
             print('path to move %s %s' %(path_file,path_to_move))
-            shutil.move(path_file,path_to_move)
+            shutil.move(path_file,path_to_move) 
         
 def remove_duplicate(malwaredataset='/mnt/data/soreldataset/'):
     for root,dirs,files in os.walk(malwaredataset):

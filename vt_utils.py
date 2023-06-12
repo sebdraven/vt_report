@@ -121,16 +121,18 @@ def launch_capa():
             capa_extraction.delay(path_file)
             path_file = redis_client.lpop('files')
 
-def load_files(path_file,malwaredataset='/mnt/data/soreldataset/'):
+def load_files(path_file,malwaredataset='/mnt/data/soreldataset/',max=1000000):
     redis_client = StrictRedis(db=6, decode_responses=True)
-
+    count = 0
     with open(path_file, 'r') as f:
         for line in f.readlines():
             path_ml = os.path.join(malwaredataset,line.strip())
             if os.path.isfile(path_ml):
                 redis_client.rpush('files',path_ml)
                 print('file %s is recorded' % path_ml)
-
+                count += 1
+                if count == max:
+                    break
             
 def stats(jsons_capa='jsons_capa', jsons_report='jsons'):
     stats_jsons_capa = 0

@@ -128,6 +128,7 @@ def load_files(path_file,malwaredataset='/mnt/data/soreldataset/'):
         for line in f.readlines():
             path_ml = os.join(malwaredataset,line.strip())
             redis_client.rpush('files',path_ml)
+            print('file %s is recorded' % path_ml)
 
             
 def stats(jsons_capa='jsons_capa', jsons_report='jsons'):

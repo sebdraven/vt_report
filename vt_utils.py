@@ -127,7 +127,7 @@ def load_files(path_file,malwaredataset='/mnt/data/soreldataset/'):
     with open(path_file, 'r') as f:
         for line in f.readlines():
             path_ml = os.path.join(malwaredataset,line.strip())
-            if os.path.isfile(path_ml):
+            if not os.path.isfile(path_ml):
                 redis_client.rpush('files',path_ml)
                 print('file %s is recorded' % path_ml)
 

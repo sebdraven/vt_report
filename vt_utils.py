@@ -242,4 +242,7 @@ if __name__ == '__main__':
     if args.remove_duplicate:
         remove_duplicate()
     if args.load:
-        load_files(args.load)
+        if args.max:
+            load_files(args.load,max=args.max)
+        else:
+            load_files(args.load)

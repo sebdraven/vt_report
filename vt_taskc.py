@@ -139,6 +139,12 @@ def capa_extraction(path_file,path_rules='/mnt/data/capa-rules-5.1.0/',path_sign
     rules = capa.main.get_rules([path_rules])
   
     capa_json = None
+    name_file = os.path.basename(path_file)
+    path_dir = '/mnt/pst/jsons_capa'
+    path_file_json = '%s.capa' % os.path.join(path_dir, name_file)
+    if os.path.isfile(path_file_json):
+        return True
+    
     try:
         extractor = capa.main.get_extractor(path_file, 'auto','windows','vivisect', sigs,disable_progress=True)
         capabilities, counts = capa.main.find_capabilities(rules, extractor, disable_progress=True)
@@ -151,11 +157,7 @@ def capa_extraction(path_file,path_rules='/mnt/data/capa-rules-5.1.0/',path_sign
         client_redis.hset('file failed', key=path_file, value=1)
 
     if capa_json:
-        name_file = os.path.basename(path_file)
-        path_dir = '/mnt/pst/jsons_capa'
-        path_file_json = '%s.capa' % os.path.join(path_dir, name_file)
-        if os.path.isfile(path_file_json):
-            return True
+        
         try:
             fw = open(path_file_json, 'w')
             if fw:

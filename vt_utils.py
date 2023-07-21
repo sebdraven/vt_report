@@ -243,6 +243,6 @@ if __name__ == '__main__':
         remove_duplicate()
     if args.load:
         if args.max:
-            load_files(args.load,max=args.max)
+            load_files(args.load,max=args.max,malwaredataset=args.mlwdataset)
         else:
             load_files(args.load)
